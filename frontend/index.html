@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolarEMS &middot; Antarctic Microgrid Energy Management &amp; Digital Twin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white" aria-hidden="true">
+                    <path d="M13 2 L4 14 h6 l-1 8 9-12h-6z" />
+                </svg>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">PolarEMS <span class="badge">V1.0 INDUSTRIAL</span></span>
+                <span class="brand-sub">Antarctic Microgrid Energy Management &amp; Digital Twin</span>
+            </div>
+        </div>
+
+        <nav class="tabs" id="tabs" role="tablist" aria-label="Dashboard sections">
+            <button class="tab-btn" data-tab="dashboard" role="tab" aria-selected="true">
+                <svg viewBox="0 0 24 24" width="15" height="15">
+                    <path d="M3 12h4l2-7 4 14 2-7h6" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Dashboard
+            </button>
+            <button class="tab-btn" data-tab="dispatch" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                    <path d="M13 2 L4 14 h6 l-1 8 9-12h-6z" />
+                </svg>
+                24h Dispatch
+            </button>
+            <button class="tab-btn" data-tab="twin" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24" width="15" height="15">
+                    <path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Digital Twin
+            </button>
+            <button class="tab-btn" data-tab="diagnostics" role="tab" aria-selected="false">
+                <svg viewBox="0 0 24 24" width="15" height="15">
+                    <path d="M12 3 2 20h20L12 3z" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linejoin="round" />
+                    <path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                Diagnostics &amp; Alarms
+            </button>
+        </nav>
+
+        <div class="topbar-right">
+            <div class="weather-cluster">
+                <span class="weather-item weather-cold" title="Outside temperature">&#10052;&#65039; <b
+                        id="wxTemp">--&deg;C</b></span>
+                <span class="weather-item weather-wind" title="Wind speed">&#8767; <b id="wxWind">-- m/s</b></span>
+                <span class="weather-item weather-sun" title="Solar irradiance">&#9728;&#65039; <b id="wxIrr">--
+                        W/m&sup2;</b></span>
+            </div>
+            <select id="scenarioSelect" class="scenario-select" title="Weather profile"></select>
+            <span class="datetime" id="simClock">----&#8209;--&#8209;-- --:--:-- UTC</span>
+            <span class="api-status"><span class="api-dot" id="apiDot"></span>API ONLINE</span>
+        </div>
+    </header>
+
+    <main class="page">
+
+        <!-- Persistent stat row, present on every tab -->
+        <section class="stat-row">
+            <article class="stat-card stat-teal">
+                <div class="stat-top"><span>Station Demand</span><span class="stat-icon">&#9889;</span></div>
+                <div class="stat-value"><span id="statDemand">0.0</span><small>kW</small></div>
+                <div class="stat-sub">Thermal Load: <b id="statThermal">0</b> kW</div>
+            </article>
+
+            <article class="stat-card stat-green">
+                <div class="stat-top"><span>Renewable Output</span><span class="stat-icon">&#9728;&#65039;</span></div>
+                <div class="stat-value"><span id="statRenewable">0.0</span><small>kW</small></div>
+                <div class="stat-sub">Penetration: <b id="statPenetration">0%</b></div>
+                <div class="stat-progress">
+                    <div class="stat-progress-fill fill-green" id="barPenetration"></div>
+                </div>
+            </article>
+
+            <article class="stat-card stat-blue">
+                <div class="stat-top"><span>BESS Battery SOC</span><span class="stat-icon">&#128267;</span></div>
+                <div class="stat-value"><span id="statSoc">0</span><small>%</small> <span class="stat-delta"
+                        id="statSocDelta">+0.0 kW</span></div>
+                <div class="stat-sub">Temp: <b id="statBattTemp">0.0&deg;C</b></div>
+                <div class="stat-progress">
+                    <div class="stat-progress-fill fill-blue" id="barSoc"></div>
+                </div>
+            </article>
+
+            <article class="stat-card stat-amber">
+                <div class="stat-top"><span>Diesel Reserve</span><span class="stat-icon">&#9981;</span></div>
+                <div class="stat-value"><span id="statFuel">0</span><small>L</small></div>
+                <div class="stat-sub">Output: <b id="statGensetOutput">0</b> kW</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-fill fill-amber" id="barFuel"></div>
+                </div>
+            </article>
+
+            <article class="stat-card stat-rose">
+                <div class="stat-top"><span>CO&#8322; Emission Rate</span><span class="stat-icon">&#128168;</span></div>
+                <div class="stat-value"><span id="statCo2">0.0</span><small>kg/h</small></div>
+                <div class="stat-sub">Cumulative: <b id="statCo2Cum">0.0</b> t</div>
+            </article>
+        </section>
+
+        <!-- Dashboard / Digital Twin: power flow map + playback control -->
+        <section class="tab-panel" id="panel-flow">
+            <div class="grid-flow">
+
+                <article class="panel">
+                    <div class="panel-head">
+                        <h2>Microgrid Bus &amp; Power Flow Map</h2>
+                        <span class="pill pill-teal">LIVE POWER BUS</span>
+                    </div>
+                    <div id="flowMap" class="flow-map"></div>
+                </article>
+
+                <article class="panel">
+                    <div class="panel-head">
+                        <h2>Digital Twin Playback &amp; Control</h2>
+                        <span class="pill pill-green" id="runningPill">RUNNING LIVE</span>
+                    </div>
+
+                    <div class="twin-controls">
+                        <button class="ctrl-btn ctrl-primary" id="btnPause">&#10074;&#10074; PAUSE</button>
+                        <button class="ctrl-btn" id="btnStep">&#9199; STEP +60s</button>
+                        <button class="ctrl-btn" id="btnReset">&#8635; RESET</button>
+                    </div>
+
+                    <div class="twin-row">
+                        <span class="twin-label">Simulation Speed:</span>
+                        <span class="twin-hint" id="speedHint">1x Real&#8209;Time</span>
+                    </div>
+                    <div class="speed-buttons" id="speedButtons"></div>
+
+                    <div class="twin-status-row">
+                        <span class="twin-label">Diesel Genset Status:</span>
+                        <button class="genset-toggle" id="gensetToggle">ONLINE (ACTIVE)</button>
+                    </div>
+
+                    <div class="twin-slider-row">
+                        <span class="twin-label">Inject Station Load:</span>
+                        <span class="twin-slider-value" id="loadSliderValue">0.0 kW</span>
+                    </div>
+                    <input type="range" id="loadSlider" class="twin-slider" min="20" max="200" step="0.5">
+                </article>
+
+            </div>
+        </section>
+
+        <!-- 24h Dispatch -->
+        <section class="tab-panel" id="panel-dispatch" hidden>
+            <article class="panel">
+                <div class="panel-head">
+                    <div>
+                        <h2>24-Hour Multi-Objective Dispatch Schedule</h2>
+                        <p class="panel-sub">Optimal energy balance minimizing fuel consumption &amp; carbon emissions
+                        </p>
+                    </div>
+                    <button class="ctrl-btn ctrl-primary" id="btnSolve">&#9654; RUN 24H SOLVER</button>
+                </div>
+
+                <div class="dispatch-metrics">
+                    <div class="dispatch-metric">
+                        <span>Expected 24h Fuel:</span>
+                        <b id="dispatchFuel" class="metric-amber">0 L</b>
+                    </div>
+                    <div class="dispatch-metric">
+                        <span>Expected 24h Emissions:</span>
+                        <b id="dispatchEmissions" class="metric-rose">0 kg CO&#8322;</b>
+                    </div>
+                    <div class="dispatch-metric">
+                        <span>Total Dispatch Cost:</span>
+                        <b id="dispatchCost" class="metric-green">$0.00</b>
+                    </div>
+                </div>
+
+                <div class="dispatch-legend">
+                    <span class="legend-item"><i class="swatch sw-solar"></i>Solar</span>
+                    <span class="legend-item"><i class="swatch sw-wind"></i>Wind</span>
+                    <span class="legend-item"><i class="swatch sw-batt"></i>Battery assist</span>
+                    <span class="legend-item"><i class="swatch sw-diesel"></i>Diesel</span>
+                </div>
+                <div id="dispatchChart" class="chart-holder"></div>
+            </article>
+        </section>
+
+        <!-- Diagnostics & Alarms -->
+        <section class="tab-panel" id="panel-diagnostics" hidden>
+            <article class="panel">
+                <div class="panel-head">
+                    <h2>Alarms &amp; Diagnostic Monitor</h2>
+                    <span class="pill pill-amber" id="alarmCountPill">0 ACTIVE ALARM</span>
+                </div>
+                <ul class="alarm-list" id="alarmList"></ul>
+            </article>
+
+            <div class="grid-two">
+                <article class="panel small-panel">
+                    <div class="small-panel-icon icon-cyan">&#10052;&#65039;</div>
+                    <div>
+                        <div class="small-panel-title">Rotor Anti-Icing</div>
+                        <div class="small-panel-value" id="iceStatus">STANDBY</div>
+                    </div>
+                </article>
+                <article class="panel small-panel">
+                    <div class="small-panel-icon icon-amber">&#128295;</div>
+                    <div>
+                        <div class="small-panel-title">Diesel Service Due</div>
+                        <div class="small-panel-value" id="serviceHours">-- hrs</div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

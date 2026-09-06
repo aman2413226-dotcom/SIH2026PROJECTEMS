@@ -1,6 +1,6 @@
 import logging
 import sys
-from backend.app.core.config import settings
+from SIH2026PROJECTEMS.backend.app.core.config import settings
 
 
 def setup_logger(name: str = "polar_ems") -> logging.Logger:

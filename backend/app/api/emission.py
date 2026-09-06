@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from backend.app.core.config import settings
+from SIH2026PROJECTEMS.backend.app.core.config import settings
 
 router = APIRouter(prefix="/emission", tags=["Emissions & Polar Treaty Compliance"])
 

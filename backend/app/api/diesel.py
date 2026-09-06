@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from backend.app.core.config import settings
-from backend.app.core.security import verify_api_key
+from SIH2026PROJECTEMS.backend.app.core.config import settings
+from SIH2026PROJECTEMS.backend.app.core.security import verify_api_key
 
 router = APIRouter(prefix="/diesel", tags=["Diesel Generator Dispatch & Reserves"])
 

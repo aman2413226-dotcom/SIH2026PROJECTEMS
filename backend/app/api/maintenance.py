@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from backend.app.core.security import verify_api_key
+from SIH2026PROJECTEMS.backend.app.core.security import verify_api_key
 
 router = APIRouter(prefix="/maintenance", tags=["Predictive Maintenance & Winterization"])
 

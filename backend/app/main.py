@@ -1,6 +1,8 @@
 import sys
 from pathlib import Path
 
+from SIH2026PROJECTEMS.backend.app.api import battery, dashboard, diesel, emission, faults, forecast, maintenance, simulation
+
 # Ensure project root is in sys.path to support running from root or backend directory
 _project_root = Path(__file__).resolve().parent.parent.parent
 if str(_project_root) not in sys.path:
@@ -11,23 +13,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from backend.app.core.config import settings
-from backend.app.core.logger import logger
-from backend.app.middleware.cors import setup_cors
-from backend.app.middleware.logging import TelemetryLoggingMiddleware
-from backend.app.events.event_bus import event_bus
-from backend.app.events.events import StationEvent, EventSeverity
+from SIH2026PROJECTEMS.backend.app.core.config import settings
+from SIH2026PROJECTEMS.backend.app.core.logger import logger
+from SIH2026PROJECTEMS.backend.app.middleware.cors import setup_cors
+from SIH2026PROJECTEMS.backend.app.middleware.logging import TelemetryLoggingMiddleware
+from SIH2026PROJECTEMS.backend.app.events.event_bus import event_bus
+from SIH2026PROJECTEMS.backend.app.events.events import StationEvent, EventSeverity
 
 # Import all 9 API Routers
-from backend.app.api import (
-    battery,
-    dashboard,
-    diesel,
-    emission,
-    faults,
-    forecast,
-    maintenance,
-    simulation,
+from SIH2026PROJECTEMS.backend.app.api import (
     weather,
 )
 
