@@ -1,7 +1,7 @@
 import asyncio
 from typing import Callable, Dict, List, Coroutine, Any
-from SIH2026PROJECTEMS.backend.app.events.events import StationEvent
-from SIH2026PROJECTEMS.backend.app.core.logger import logger
+from backend.app.events.events import StationEvent
+from backend.app.core.logger import logger
 
 
 class EventBus:

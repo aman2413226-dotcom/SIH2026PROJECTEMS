@@ -1,0 +1,1 @@
+[{"fault_id":"FLT-9021","timestamp":"2026-09-07T19:04:31.541033+00:00","system":"Wind Turbine #2","severity":"WARNING","fault_type":"ROTOR_ICING_WATCH","ai_confidence_score":0.92,"description":"Subzero humidity profile indicates elevated riming conditions on blade aerofoils.","ai_recommendation":"Electro-thermal blade de-icing on standby.","acknowledged":false}]

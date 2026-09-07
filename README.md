@@ -6,15 +6,13 @@
 ---
 
 # Overview
-PolarEMS is an AI-powered Energy Management System designed for Indian Antarctic research stations. It combines renewable forecasting, load prediction, battery optimization, intelligent diesel scheduling, simulation, and an event-driven dashboard.
+PolarEMS is an AI-powered Energy Management System designed for Indian Antarctic research stations. It combines renewable forecasting, load prediction, battery optimization, intelligent diesel scheduling, and an event-driven dashboard.
 
 ## Objectives
 - Reduce diesel consumption
 - Maximize renewable utilization
 - Optimize battery SOC
 - Provide explainable AI recommendations
-- Simulate extreme polar scenarios
-- Build a digital twin for decision support
 
 # Repository Structure
 
@@ -23,7 +21,6 @@ SIH2026PROJECTEMS/
 ├── frontend/
 ├── backend/
 ├── ai/
-├── simulation/
 ├── optimization/
 ├── datasets/
 ├── docs/
@@ -40,7 +37,6 @@ SIH2026PROJECTEMS/
 | frontend | Next.js Mission Control dashboard |
 | backend | FastAPI APIs and business logic |
 | ai | ML models, training and inference |
-| simulation | Polar station simulator and digital twin |
 | optimization | OR-Tools scheduling engine |
 | datasets | Weather, load and synthetic datasets |
 | docs | Documentation and project memory |
@@ -84,8 +80,6 @@ Research
 ↓
 Frontend
 ↓
-Simulation
-↓
 Backend
 ↓
 EDA
@@ -93,8 +87,6 @@ EDA
 ML Models
 ↓
 Optimization
-↓
-Digital Twin
 ↓
 Testing
 ↓
@@ -146,18 +138,6 @@ Outputs:
 - Load Shedding
 - AI Recommendation
 
-# Simulation Engine
-
-Simulates:
-- Weather
-- Wind
-- Solar
-- Battery
-- Diesel
-- Station Load
-- Emergencies
-- Blizzard scenarios
-
 # Team Roles
 
 | Role | Responsibilities | Skills |
@@ -167,7 +147,6 @@ Simulates:
 | Backend Engineer | APIs, services, event bus | FastAPI, Python |
 | ML Engineer | EDA, forecasting | Pandas, XGBoost |
 | Optimization Engineer | Scheduling | OR-Tools |
-| Simulation Engineer | Digital Twin | Python, SimPy |
 
 # Working Flow
 

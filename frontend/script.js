@@ -485,6 +485,87 @@ function initTwinControls() {
     document.getElementById("btnSolve").addEventListener("click", () => {
         renderDispatchChart(buildDispatch(state.scenario));
     });
+
+    /* Security IDS Red Team Handlers */
+    const badge = document.getElementById("postureBadge");
+    const panel = document.getElementById("securityPanel");
+    const auditLog = document.getElementById("auditLog");
+
+    function logAudit(status, vector, msg) {
+        if (!auditLog) return;
+        const now = new Date().toISOString().slice(11, 19) + "Z";
+        const entry = document.createElement("div");
+        entry.className = "audit-entry";
+        entry.innerHTML = `<span>${now}</span><span class="${status === 'INTERCEPTED' ? 'status-intercepted' : 'status-cleared'}">[${status}]</span><span>${vector}: ${msg}</span>`;
+        auditLog.prepend(entry);
+    }
+
+    const btnHijack = document.getElementById("btnAttackHijack");
+    if (btnHijack) {
+        btnHijack.addEventListener("click", async () => {
+            badge.textContent = "POSTURE: COMPROMISED";
+            badge.className = "posture-badge posture-compromised";
+            panel.classList.add("compromised");
+            state.manualLoad = 195.0;
+            document.getElementById("loadSlider").value = 195.0;
+            document.getElementById("loadSliderValue").textContent = "195.0 kW";
+            logAudit("INTERCEPTED", "LOAD_HIJACK", "Rogue surge +85kW injected into HVAC. Isolated by IDS.");
+            try {
+                await fetch("http://localhost:8000/api/v1/security/attack/load-hijack", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ surge_kw: 85.0 }),
+                });
+            } catch (e) {}
+            tick();
+        });
+    }
+
+    const btnSpoof = document.getElementById("btnAttackSpoof");
+    if (btnSpoof) {
+        btnSpoof.addEventListener("click", async () => {
+            badge.textContent = "POSTURE: COMPROMISED";
+            badge.className = "posture-badge posture-compromised";
+            panel.classList.add("compromised");
+            logAudit("INTERCEPTED", "SENSOR_SPOOF", "Impossible +28.5°C temperature packet injected. Quarantined.");
+            try {
+                await fetch("http://localhost:8000/api/v1/security/attack/sensor-spoof", { method: "POST" });
+            } catch (e) {}
+            tick();
+        });
+    }
+
+    const btnResetSec = document.getElementById("btnResetPosture");
+    if (btnResetSec) {
+        btnResetSec.addEventListener("click", async () => {
+            badge.textContent = "POSTURE: SECURE";
+            badge.className = "posture-badge posture-secure";
+            panel.classList.remove("compromised");
+            state.manualLoad = 125.5;
+            document.getElementById("loadSlider").value = 125.5;
+            document.getElementById("loadSliderValue").textContent = "125.5 kW";
+            logAudit("CLEARED", "OPERATOR_RESET", "Security posture restored to SECURE by operator.");
+            try {
+                await fetch("http://localhost:8000/api/v1/security/reset", { method: "POST" });
+            } catch (e) {}
+            tick();
+        });
+    }
+}
+
+async function syncBackendLive() {
+    try {
+        const res = await fetch("http://localhost:8000/api/v1/dashboard/overview");
+        if (res.ok) {
+            const data = await res.json();
+            const dot = document.getElementById("apiDot");
+            if (dot) dot.style.background = "#10b981";
+            if (data.power_balance) {
+                state.batterySoc = data.autonomy?.battery_soc_pct || state.batterySoc;
+                state.fuelLiters = data.autonomy?.fuel_reserve_liters || state.fuelLiters;
+            }
+        }
+    } catch (e) {}
 }
 
 function init() {
@@ -495,6 +576,7 @@ function init() {
     switchTab("dashboard");
     tick();
     restartTimer();
+    setInterval(syncBackendLive, 2000);
 }
 
 document.addEventListener("DOMContentLoaded", init);

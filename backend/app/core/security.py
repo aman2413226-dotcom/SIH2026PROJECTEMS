@@ -1,6 +1,6 @@
 from fastapi import Security, HTTPException, status
 from fastapi.security import APIKeyHeader
-from SIH2026PROJECTEMS.backend.app.core.config import settings
+from backend.app.core.config import settings
 
 API_KEY_HEADER = APIKeyHeader(name="X-Polar-API-Key", auto_error=False)
 

@@ -1,0 +1,687 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Bharati: Live Data</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/images/ncpor1.png">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/static/newstatic/assets/favicon/ms-icon-144x144.png">
+  <link rel="stylesheet" href="/static/fontawesome/css/all.min.css"
+    integrity="..." crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" href='/static/bootstrap/css/bootstrap.min.css' />
+  <!-- Vendors styles-->
+  <link rel="stylesheet" href="/static/newstatic/vendors/simplebar/css/simplebar.css">
+  <link rel="stylesheet" href="/static/newstatic/css/vendors/simplebar.css">
+  <!-- Main styles for this application-->
+  <link href="/static/newstatic/css/style.css?version=2" rel="stylesheet">
+  <!-- We use those styles to show code examples, you should remove them in your application.-->
+  <link href="/static/newstatic/css/examples.css?version=2" rel="stylesheet">
+  <link href="/static/newstatic/css/chstyle.css?version=2" rel="stylesheet">
+  
+<script src="/static/canvasjs/canvasjs.min.js"></script>
+<script>
+window.onload = function () {
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	theme: "light1",
+	animationEnabled: true,
+	exportEnabled: true,
+	animationDuration: 200,
+	zoomEnabled: true, 
+	title:{
+		text: "Antarctica - Bharati",
+		fontColor: "#8129e6",
+		fontSize: 20,
+		fontWeight: "lighter",
+	},
+//    subtitles: [{
+// 		text: "Himansh",
+// 		fontColor: "#5A55A3",
+// 		fontSize: 20
+// 	}],
+	axisX: {
+		title: "",	
+	},
+	axisY:[{
+			title: "Temperature °C",			
+			lineColor: "#D9534F",
+			titleFontColor: "#D9534F",
+			labelFontColor: "#D9534F",
+			labelFontSize: 15,
+			titleFontSize: 20
+		},
+		{
+			title: "Wind Speed (m/s)",
+			lineColor: "#4E8DF1",
+			titleFontColor: "#4E8DF1",
+			labelFontColor: "#4E8DF1",
+			labelFontSize: 15,
+			titleFontSize: 20
+
+		}],
+		axisY2:[{
+			title: "Air Pressure (mBar)",
+			lineColor: "#343A40",
+			titleFontColor: "#343A40",
+			labelFontColor: "#343A40",
+			minimum: 964,
+			maximum: 982,
+			labelFontSize: 15,
+			titleFontSize: 20
+			
+		},
+		
+		{
+			title: "Relative Humidity ( % )",
+			lineColor: "#5CB85C",
+			titleFontColor: "#5CB85C",
+			labelFontColor: "#5CB85C",
+			minimum: 43,
+			maximum: 56,
+			labelFontSize: 15,
+			titleFontSize: 20
+		}
+		 
+		],
+
+	legend:{
+		cursor: "pointer",
+		fontSize: 16,
+		itemclick: toggleDataSeries,
+	
+	},
+	toolTip:{
+		shared: true
+	},
+	data: [{
+		name: "Temperature",
+		type: "spline",
+		markerType: "none",
+		lineThickness: 3,
+		yValueFormatString: "#0.## °C",
+		legendMarkerType: "circle",
+		markerSize:12,
+		axisYIndex: 0,
+		showInLegend: true,
+		xValueType: "dateTime",
+		color:"#D9534F",
+		legendMarkerColor:"#D9534F",
+		dataPoints: [
+			  			  
+				{ x: 1788629400000, y : -14.2 },				
+			  			  
+				{ x: 1788633000000, y : -13.79 },				
+			  			  
+				{ x: 1788636600000, y : -13.57 },				
+			  			  
+				{ x: 1788640200000, y : -13.67 },				
+			  			  
+				{ x: 1788643800000, y : -12.95 },				
+			  			  
+				{ x: 1788647400000, y : -12.29 },				
+			  			  
+				{ x: 1788651000000, y : -11.83 },				
+			  			  
+				{ x: 1788654600000, y : -11.18 },				
+			  			  
+				{ x: 1788658200000, y : -10.74 },				
+			  			  
+				{ x: 1788661800000, y : -11.08 },				
+			  			  
+				{ x: 1788665400000, y : -11.15 },				
+			  			  
+				{ x: 1788669000000, y : -11.28 },				
+			  			  
+				{ x: 1788672600000, y : -11.39 },				
+			  			  
+				{ x: 1788676200000, y : -11.63 },				
+			  			  
+				{ x: 1788679800000, y : -12.01 },				
+			  			  
+				{ x: 1788683400000, y : -12.14 },				
+			  			  
+				{ x: 1788687000000, y : -12.15 },				
+			  			  
+				{ x: 1788690600000, y : -12.29 },				
+			  			  
+				{ x: 1788694200000, y : -12.65 },				
+			  			  
+				{ x: 1788697800000, y : -12.21 },				
+			  			  
+				{ x: 1788701400000, y : -12.1 },				
+			  			  
+				{ x: 1788705000000, y : -11.84 },				
+			  			  
+				{ x: 1788708600000, y : -12.27 },				
+			  			  
+				{ x: 1788712200000, y : -12.94 },				
+			  			  
+				{ x: 1788715800000, y : -13.3 },				
+			  
+		]
+	},
+	{
+		name: "Wind Speed",
+		type: "spline",
+		markerType: "none",
+		lineThickness: 3,
+		yValueFormatString: "#0.## m/s",
+		legendMarkerType: "circle",
+		markerSize:12,
+		showInLegend: true,
+		axisYIndex: 1,
+		xValueType: "dateTime",
+		color:"#4E8DF1",
+		legendMarkerColor:"#4E8DF1",
+		dataPoints: [
+			  			  
+				{ x: 1788629400000, y : 9.8 },				
+			  			  
+				{ x: 1788633000000, y : 9.74 },				
+			  			  
+				{ x: 1788636600000, y : 8.01 },				
+			  			  
+				{ x: 1788640200000, y : 6.03 },				
+			  			  
+				{ x: 1788643800000, y : 3.89 },				
+			  			  
+				{ x: 1788647400000, y : 4.36 },				
+			  			  
+				{ x: 1788651000000, y : 2.87 },				
+			  			  
+				{ x: 1788654600000, y : 4.44 },				
+			  			  
+				{ x: 1788658200000, y : 12.32 },				
+			  			  
+				{ x: 1788661800000, y : 13.33 },				
+			  			  
+				{ x: 1788665400000, y : 12.5 },				
+			  			  
+				{ x: 1788669000000, y : 12.0 },				
+			  			  
+				{ x: 1788672600000, y : 13.1 },				
+			  			  
+				{ x: 1788676200000, y : 12.72 },				
+			  			  
+				{ x: 1788679800000, y : 16.23 },				
+			  			  
+				{ x: 1788683400000, y : 13.45 },				
+			  			  
+				{ x: 1788687000000, y : 11.74 },				
+			  			  
+				{ x: 1788690600000, y : 12.69 },				
+			  			  
+				{ x: 1788694200000, y : 13.26 },				
+			  			  
+				{ x: 1788697800000, y : 13.13 },				
+			  			  
+				{ x: 1788701400000, y : 12.52 },				
+			  			  
+				{ x: 1788705000000, y : 13.55 },				
+			  			  
+				{ x: 1788708600000, y : 16.76 },				
+			  			  
+				{ x: 1788712200000, y : 19.48 },				
+			  			  
+				{ x: 1788715800000, y : 19.89 },				
+			  
+		]
+	},
+	{
+		name: "Air Pressure",
+		type: "spline",
+		markerType: "none",
+		lineThickness: 3,
+		yValueFormatString: "#0.## mBar",
+		legendMarkerType: "circle",
+		markerSize:12,
+		showInLegend: true,
+		axisYType: "secondary",
+		xValueType: "dateTime",
+		color:"#343A40",		
+		legendMarkerColor:"#343A40",
+		dataPoints: [
+			  			  
+				{ x: 1788629400000, y : 969.6 },				
+			  			  
+				{ x: 1788633000000, y : 969.61 },				
+			  			  
+				{ x: 1788636600000, y : 969.35 },				
+			  			  
+				{ x: 1788640200000, y : 969.44 },				
+			  			  
+				{ x: 1788643800000, y : 969.53 },				
+			  			  
+				{ x: 1788647400000, y : 969.62 },				
+			  			  
+				{ x: 1788651000000, y : 969.67 },				
+			  			  
+				{ x: 1788654600000, y : 969.7 },				
+			  			  
+				{ x: 1788658200000, y : 969.54 },				
+			  			  
+				{ x: 1788661800000, y : 969.36 },				
+			  			  
+				{ x: 1788665400000, y : 969.57 },				
+			  			  
+				{ x: 1788669000000, y : 970.06 },				
+			  			  
+				{ x: 1788672600000, y : 970.39 },				
+			  			  
+				{ x: 1788676200000, y : 971.05 },				
+			  			  
+				{ x: 1788679800000, y : 971.24 },				
+			  			  
+				{ x: 1788683400000, y : 971.86 },				
+			  			  
+				{ x: 1788687000000, y : 972.59 },				
+			  			  
+				{ x: 1788690600000, y : 973.04 },				
+			  			  
+				{ x: 1788694200000, y : 973.53 },				
+			  			  
+				{ x: 1788697800000, y : 974.38 },				
+			  			  
+				{ x: 1788701400000, y : 975.29 },				
+			  			  
+				{ x: 1788705000000, y : 975.92 },				
+			  			  
+				{ x: 1788708600000, y : 976.58 },				
+			  			  
+				{ x: 1788712200000, y : 977.21 },				
+			  			  
+				{ x: 1788715800000, y : 977.84 },				
+			  
+		]
+	},
+	{
+		name: "Relative Humidity",
+		type: "spline",
+		markerType: "none",
+		lineThickness: 3,
+		axisYType: "secondary",
+		axisYIndex: 1,
+		legendMarkerType: "circle",
+		//yValueFormatString: "#000.## %",
+		markerSize:12,
+		showInLegend: true,
+		xValueType: "dateTime",
+		color: "#5CB85C",
+		legendMarkerColor:"#5CB85C",
+		 
+		dataPoints: [
+			  			  
+				{ x: 1788629400000, y : 51.9 },				
+			  			  
+				{ x: 1788633000000, y : 52.54 },				
+			  			  
+				{ x: 1788636600000, y : 52.26 },				
+			  			  
+				{ x: 1788640200000, y : 52.95 },				
+			  			  
+				{ x: 1788643800000, y : 53.21 },				
+			  			  
+				{ x: 1788647400000, y : 53.46 },				
+			  			  
+				{ x: 1788651000000, y : 55.04 },				
+			  			  
+				{ x: 1788654600000, y : 50.39 },				
+			  			  
+				{ x: 1788658200000, y : 46.72 },				
+			  			  
+				{ x: 1788661800000, y : 47.52 },				
+			  			  
+				{ x: 1788665400000, y : 50.42 },				
+			  			  
+				{ x: 1788669000000, y : 47.26 },				
+			  			  
+				{ x: 1788672600000, y : 45.7 },				
+			  			  
+				{ x: 1788676200000, y : 46.17 },				
+			  			  
+				{ x: 1788679800000, y : 44.41 },				
+			  			  
+				{ x: 1788683400000, y : 44.63 },				
+			  			  
+				{ x: 1788687000000, y : 48.13 },				
+			  			  
+				{ x: 1788690600000, y : 47.89 },				
+			  			  
+				{ x: 1788694200000, y : 49.34 },				
+			  			  
+				{ x: 1788697800000, y : 48.86 },				
+			  			  
+				{ x: 1788701400000, y : 49.09 },				
+			  			  
+				{ x: 1788705000000, y : 46.64 },				
+			  			  
+				{ x: 1788708600000, y : 46.55 },				
+			  			  
+				{ x: 1788712200000, y : 49.17 },				
+			  			  
+				{ x: 1788715800000, y : 49.43 },				
+			  
+		]
+	}]
+});
+chart.render();
+
+function toggleDataSeries(e){
+	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	}
+	else{
+		e.dataSeries.visible = true;
+	}
+	chart.render();
+}
+
+}
+</script>
+
+</head>
+
+<body>
+
+  <!-- sidebar -->
+  <div class="sidebar sidebar-dark sidebar-fixed " id="sidebar">
+    <div class="sidebar-brand d-none d-md-flex">
+      <spam class="sidebar-brand-full" width="118" height="46" alt="CoreUI Logo">
+        <b
+          class="brand">NPDC</b><!--<img src="/static/newstatic/assets/img/NPDC.png" width="118" height="46" alt="sidebar-brand">-->
+      </spam>
+      <svg class="sidebar-brand-narrow" width="50" height="50" alt="CoreUI Logo">
+        <use xlink:href="/static/newstatic/assets/brand/coreui.svg%23signet'%}"></use>
+      </svg>
+    </div>
+    <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
+      <li class="nav-item"> <a class="nav-link" href="/">
+          <span class="nav-icon">
+            <i class="fa fa-home"> </i> </span>Home</a></li>
+      <li class="nav-title">Stations</li>
+      <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
+          <span class="nav-icon"><i class="fa fa fa-database"> </i></span> Bharati</a>
+        <ul class="nav-group-items">
+          <li class="nav-item"><a class="nav-link" href="/bharati/live"><span class="nav-icon"></span>Live Data</a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="/bharati/temp"><span
+                class="nav-icon"></span>Air Temperature</a></li>
+          <li class="nav-item"><a class="nav-link" href="/bharati/ws"><span
+                class="nav-icon"></span>Wind Speed</a></li>
+          <li class="nav-item"><a class="nav-link" href="/bharati/wd"><span
+                class="nav-icon"></span>Wind Direction</a></li>
+          <li class="nav-item"><a class="nav-link" href="/bharati/ap"><span
+                class="nav-icon"></span>Air Pressure</a></li>
+          <li class="nav-item"><a class="nav-link" href="/bharati/rh"><span
+                class="nav-icon"></span>Relative Humidity</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
+          <span class="nav-icon"><i class="fa fa fa-database"> </i></span> Maitri</a>
+        <ul class="nav-group-items">
+          <li class="nav-item"><a class="nav-link" href="/maitri/live"><span class="nav-icon"></span>Live Data</a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="/maitri/temp"><span
+                class="nav-icon"></span>Air Temperature </a></li>
+          <li class="nav-item"><a class="nav-link" href="/maitri/wind"><span class="nav-icon"></span>Wind Speed</a></li>
+          <li class="nav-item"><a class="nav-link" href="/maitri/wind_d"><span class="nav-icon"></span>Wind Direction</a></li>
+          <li class="nav-item"><a class="nav-link" href="/maitri/ap"><span class="nav-icon"></span>Air
+              Pressure</a></li>
+          <li class="nav-item"><a class="nav-link" href="/maitri/rh"><span class="nav-icon"></span>Relative
+              Humidity</a></li>
+        </ul>
+      </li>
+      <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
+          <span class="nav-icon"><i class="fa fa fa-database"> </i></span> Himansh</a>
+        <ul class="nav-group-items">
+          <li class="nav-item"><a class="nav-link" href="/himansh/live"><span class="nav-icon"></span>Live Data</a>
+          </li>
+          <li class="nav-item"><a class="nav-link" href="/himansh/temp"><span
+                class="nav-icon"></span>Temperature</a></li>
+          <li class="nav-item"><a class="nav-link" href="/himansh/wind"><span class="nav-icon"></span>Wind
+              Speed</a></li>
+          <li class="nav-item"><a class="nav-link" href="/himansh/wind_d"><span class="nav-icon"></span>Wind
+              Direction</a></li>
+          <li class="nav-item"><a class="nav-link" href="/himansh/airpres"><span class="nav-icon"></span>Air
+              Pressure</a></li>
+          <li class="nav-item"><a class="nav-link" href="/himansh/rh"><span class="nav-icon"></span>Relative
+              Humidity</a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/wl"><span class="nav-icon"></span>Water Level</a></li>
+          <li class="nav-item nav-group"><a class="nav-link nav-group-toggle" href="#">
+            <span class="nav-icon"><i class="fa fa fa-database"></i></span>Mass Balance</a>
+            <ul class="nav-group-items">
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Sutri_Dhaka"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Sutri Dhaka</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Batal"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Batal</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Samudra_Tapu"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Samudra Tapu</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Bara_Shigri"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Bara Shigri</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Gepang_Gath"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Gepang Gath</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="/himansh/mb/Kunzam"><span class="nav-icon" style="padding-left: 30%; font-size:16px;">Kunzam</span></a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-group"><a class="nav-link nav-group-toggle" href="#">
+        <span class="nav-icon"><i class="fa fa fa-database"> </i></span> Himadri</a>
+      <ul class="nav-group-items">
+        <li class="nav-item"><a class="nav-link" href="/himadri/live"><span class="nav-icon"></span>Live Data</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/himadri/temp"><span class="nav-icon"></span>Temperature</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/himadri/temp_alt"><span class="nav-icon"></span>Temperature(Altitude)</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/himadri/rh"><span class="nav-icon"></span>Relative Humidity</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/himadri/ap"><span class="nav-icon"></span>Air Pressure</a>
+        </li>
+        <!-- <li class="nav-item"><a class="nav-link" href="/himadri/snow"><span class="nav-icon"></span>Snow Fall</a>
+        </li> -->
+        <li class="nav-item"><a class="nav-link" href="/himadri/intensity_precipitation"><span class="nav-icon"></span>Intensity Precipitation</a>
+        </li>
+      </ul>
+    </li>
+
+    </ul>
+    <button class="sidebar-toggler" type="button"
+      onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
+  </div>
+
+  <!-- header header-sticky -->
+  <div class="wrapper d-flex flex-column min-vh-100 bg-light ">
+    <header class="header header-sticky mb-4">
+      <div class="container-fluid">
+        <button class="header-toggler px-md-0 me-md-3" type="button"
+          onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()">
+          <spam class="icon icon-lg">
+            <i class="fa fa fa-bars"></i>
+          </spam>
+        </button>
+        
+        <a class="header-brand d-md-none" href="#">
+          <svg width="118" height="46" alt="CoreUI Logo">
+            <use xlink:href="/static/newstatic/assets/brand/coreui.svg%23full'%}"></use>
+          </svg></a>
+        <!-- <ul class="header-nav d-none d-md-flex">
+          <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
+        </ul> -->
+        <ul class="header-nav ms-auto">
+
+        </ul>
+
+      </div>
+      <div class="header-divider"></div>
+      <div class="container-fluid">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb my-0 ms-2">
+            <li class="breadcrumb-item">
+              <!-- if breadcrumb is single--><a href="/">Home</a>
+            </li>
+            <li class="breadcrumb-item active"><span>Bharati / Live Data</span></li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+
+    <div class="body flex-grow-1 px-3">
+      <div class="container-fluid">
+        
+<div class="h-100 d-flex chart-heading-kpi">
+    <table width="100%">
+        <tr>
+            <td rowspan="2" align="center" style="font-size: 20px;">06 Sep 2026</td>
+            <td align="right" style="color: #66fb4c;" id="div1h3">Temperature:</td>
+            <td align="left" class="text-danger" style="font-size: 20px;" id = "divtemp"> &nbsp;-10.74&deg; C</td>
+            <td align="right" style="color: #66fb4c;">Relative Humidity:</td>
+            <td align="left" style="font-size: 20px;" id="divrh"> &nbsp;55.04%</td>
+        </tr>
+        <tr>
+            <td align="right" style="color: #66fb4c;">Air Pressure:</td>
+            <td align="left" style="font-size: 20px;" id="divap"> &nbsp;977.84 mBar</td>
+            <td align="right" style="color: #66fb4c;">Wind Speed</td>
+            <td align="left" class="text-info" style="font-size: 20px;" id="divw"> &nbsp;19.89 knots</td>
+        </tr>
+    </table>
+</div>
+
+        
+<div class="chart-container">
+    <div class="border border-primary rounded">
+        <p class="chart-title" style="text-align: center; background-color: #FFFFFF;color:blue">
+        <div id="chartContainer" style="height: 400px; width: 100%;" class='mt-3 container-fluid'></div>
+    </div>
+    <div id="myModal" class='mt-5 container bg-white'>
+        <div class="row">
+            <div class="col-md-2 pt-2">
+                <button onclick='PrintDiv()' class='btn btn-primary btn-sm float-right'>Save as Image</button>
+            </div>
+        </div>		
+        <div class='row bg-white' id="html-content-holder">
+            <div class='col-xl-4'>
+                <table class='table table-responsive text-center'>
+                    <tr>
+                        <th>Data</th>
+                        <th>Average</th>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td>-12.27 °C</td>
+                    </tr>
+                    <tr>
+                        <td>Wind Speed</td>
+                        <td> 11.51 m/s</td>
+                    </tr>
+                    <tr>
+                        <td>Air Pressure</td>
+                        <td>971.84 hPa</td>
+                    </tr>
+                    <tr>
+                        <td>Rel. Humidity</td>
+                        <td>49.19 %</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class='col-xl-4'>
+                <table class='table table-responsive text-center'>
+                    <tr>
+                        <th>Data</th>
+                        <th>Minimum</th>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td>-14.2 °C</td>
+                    </tr>
+                    <tr>
+                        <td>Wind Speed</td>
+                        <td> 2.87 m/s</td>
+                    </tr>
+                    <tr>
+                        <td>Air Pressure</td>
+                        <td>969.35 hPa</td>
+                    </tr>
+                    <tr>
+                        <td>Rel. Humidity</td>
+                        <td>44.41 %</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class='col-xl-4'>
+                <table class='table table-responsive text-center'>
+                    <tr>
+                        <th>Data</th>
+                        <th>Maxmimum</th>
+                    </tr>
+                    <tr>
+                        <td>Temperature</td>
+                        <td>-10.74 °C</td>
+                    </tr>
+                    <tr>
+                        <td>Wind Speed</td>
+                        <td> 19.89 m/s</td>
+                    </tr>
+                    <tr>
+                        <td>Air Pressure</td>
+                        <td>977.84 hPa</td>
+                    </tr>
+                    <tr>
+                        <td>Rel. Humidity</td>
+                        <td>55.04 %</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <br>&nbsp;
+      </div>
+    </div>
+
+    <footer class="footer h-100 d-flex align-items-center justify-content-center">
+      <div> Copyright &copy; National Polar Data Center, NCPOR, MoES, Govt of India. All Rights Reserved.
+      </div>
+      <!-- <div class="ms-auto">Powered by&nbsp;<a href="https://coreui.io/docs/">CoreUI UI Components</a></div>-->
+    </footer>
+  </div>
+
+  <!-- CoreUI and necessary plugins-->
+  
+<script type="text/javascript" src="/static/js/html2canvas.js"></script>
+<script>
+function PrintDiv()
+{
+var div = document.getElementById("html-content-holder");
+    html2canvas((div), {
+        onrendered: function(canvas) {
+            var myImage = canvas.toDataURL();
+            downloadURI(myImage, "Image.png");
+      }
+    });
+}
+
+function downloadURI(uri, name) {
+    var link = document.createElement("a");
+
+    link.download = name;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();   
+    //after creating link you should delete dynamic link
+    //clearDynamicLink(link); 
+}
+</script>
+
+  <script src="/static/newstatic/dist/js/coreui.bundle.min.js"></script>
+  <script src="/static/newstatic/vendors/simplebar/js/simplebar.min.js"></script>
+  <script type="text/javascript" src='/static/bootstrap/js/bootstrap.min.js'></script>
+  <script type="text/javascript" src='/static/fontawesome/js/all.min.js'></script>
+</body>
+
+</html>
