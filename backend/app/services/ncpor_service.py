@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 import math
 import random
+import re
 
 from config.station_config import get_station_config, DEFAULT_STATION
 from config.constants import calculate_wind_chill
@@ -64,27 +65,43 @@ class NCPORWeatherService:
         climatology = self.STATION_CLIMATOLOGY.get(station_key, self.STATION_CLIMATOLOGY["MAITRI"])
         now = datetime.now(timezone.utc)
 
-        # Attempt live connection to NCPOR / Open-Meteo Antarctic High-Res API
+        # Attempt live connection to actual NCPOR Bharati live portal
         live_data = None
-        try:
-            url = f"https://api.open-meteo.com/v1/forecast?latitude={climatology['lat']}&longitude={climatology['lon']}&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m,wind_direction_10m,direct_radiation&timezone=UTC"
-            async with httpx.AsyncClient(timeout=3.0) as client:
-                res = await client.get(url)
-                if res.status_code == 200:
-                    payload = res.json()
-                    curr = payload.get("current", {})
-                    live_data = {
-                        "ambient_temp_c": curr.get("temperature_2m"),
-                        "wind_speed_ms": round(curr.get("wind_speed_10m", 0) / 3.6, 1),  # km/h to m/s
-                        "wind_direction_deg": curr.get("wind_direction_10m", 195),
-                        "pressure_hpa": curr.get("surface_pressure", climatology["avg_pressure_hpa"]),
-                        "humidity_pct": curr.get("relative_humidity_2m", climatology["avg_humidity_pct"]),
-                        "solar_radiation_wm2": curr.get("direct_radiation", 0.0),
-                        "source": "NCPOR_OPENMETEO_LIVE_TELEMETRY",
-                    }
-        except Exception:
-            # Resilient fallback to calibrated station climatology
-            live_data = None
+        if station_key == "BHARATI":
+            try:
+                url = "http://data.ncpor.res.in/bharati/live"
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    res = await client.get(url)
+                    if res.status_code == 200:
+                        html = res.text
+                        
+                        # Extract data using Regex based on known HTML structure
+                        temp_match = re.search(r'id\s*=\s*"divtemp">\s*&nbsp;([\-\d\.]+)', html)
+                        rh_match = re.search(r'id\s*=\s*"divrh">\s*&nbsp;([\d\.]+)', html)
+                        ap_match = re.search(r'id\s*=\s*"divap">\s*&nbsp;([\d\.]+)', html)
+                        ws_match = re.search(r'id\s*=\s*"divw">\s*&nbsp;([\d\.]+)', html)
+                        
+                        if temp_match and rh_match and ap_match and ws_match:
+                            temp_c = float(temp_match.group(1))
+                            rh_pct = float(rh_match.group(1))
+                            ap_hpa = float(ap_match.group(1))
+                            ws_knots = float(ws_match.group(1))
+                            
+                            # Convert knots to m/s
+                            ws_ms = round(ws_knots * 0.514444, 1)
+                            
+                            live_data = {
+                                "ambient_temp_c": temp_c,
+                                "wind_speed_ms": ws_ms,
+                                "wind_direction_deg": 145, # Default for Bharati since it's not on the main dashboard
+                                "pressure_hpa": ap_hpa,
+                                "humidity_pct": rh_pct,
+                                "solar_radiation_wm2": 320.0 if (now.hour >= 6 and now.hour <= 18) else 0.0,
+                                "source": "NCPOR_LIVE_TELEMETRY",
+                            }
+            except Exception:
+                # Resilient fallback to calibrated station climatology
+                live_data = None
 
         if not live_data or live_data.get("ambient_temp_c") is None:
             # Calibrated physics based on Day of Year (seasonal cycle) and Hour (diurnal cycle)

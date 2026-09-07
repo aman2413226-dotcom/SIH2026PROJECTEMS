@@ -86,7 +86,7 @@ STATION_CONFIGS: Dict[str, Dict[str, Any]] = {
     }
 }
 
-DEFAULT_STATION = "MAITRI"
+DEFAULT_STATION = "BHARATI"
 
 
 def get_station_config(station_key: str = DEFAULT_STATION) -> Dict[str, Any]:

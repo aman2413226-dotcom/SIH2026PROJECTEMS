@@ -20,6 +20,7 @@ from backend.app.middleware.logging import TelemetryLoggingMiddleware
 from backend.app.events.event_bus import event_bus
 from backend.app.events.events import StationEvent, EventSeverity
 from simulation.digital_twin import digital_twin
+from backend.app.services.ncpor_service import ncpor_service
 
 # Import domain API routers
 from backend.app.api import (
@@ -37,6 +38,22 @@ from backend.app.api import (
 
 # Background simulation loop task reference
 _sim_task: asyncio.Task = None
+_weather_task: asyncio.Task = None
+
+async def weather_sync_loop():
+    """Continuously fetches live weather from NCPOR and syncs to Digital Twin."""
+    logger.info("Starting weather sync loop for NCPOR data.")
+    try:
+        while True:
+            target_station = digital_twin.station_key
+            try:
+                await ncpor_service.fetch_live_weather(target_station)
+                ncpor_service.sync_to_digital_twin(digital_twin, target_station)
+            except Exception as e:
+                logger.error(f"Weather sync failed: {e}")
+            await asyncio.sleep(60.0)
+    except asyncio.CancelledError:
+        logger.info("Weather sync loop stopped.")
 
 
 async def simulation_background_loop():
@@ -65,6 +82,7 @@ async def lifespan(app: FastAPI):
 
     # Start Digital Twin background physics clock
     _sim_task = asyncio.create_task(simulation_background_loop())
+    _weather_task = asyncio.create_task(weather_sync_loop())
 
     # Publish startup event to event bus
     await event_bus.publish(
@@ -81,6 +99,8 @@ async def lifespan(app: FastAPI):
 
     if _sim_task and not _sim_task.done():
         _sim_task.cancel()
+    if _weather_task and not _weather_task.done():
+        _weather_task.cancel()
 
     logger.info(f"Shutting down {settings.PROJECT_NAME} gracefully...")
 

@@ -31,13 +31,15 @@ async def get_load_forecast() -> Dict[str, Any]:
         start_hour=now.hour,
     )
 
+    load_model_meta = forecast_service.metadata.get("models", {}).get("load_demand_kw", {})
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "model": forecast_service.metadata.get("model_type", "LightGBM Regressor"),
         "training_days": forecast_service.metadata.get("training_days", 730),
-        "calibration_anchor": "Maitri Antarctic Research Station 24h Historical Profiles",
-        "r2_score": forecast_service.metadata.get("r2_score", 0.942),
-        "mae_kw": forecast_service.metadata.get("mae_kw", 2.85),
+        "calibration_anchor": "Bharati Antarctic Research Station 24h Historical Profiles",
+        "r2_score": load_model_meta.get("r2_score", 0.942),
+        "mae_kw": load_model_meta.get("mae_kw", 2.85),
         "forecast": forecast_data,
     }
 
@@ -152,14 +154,15 @@ async def get_optimal_dispatch() -> Dict[str, Any]:
 @router.get("/model-info", summary="Machine Learning Model Metadata & Calibration Details")
 async def get_model_info() -> Dict[str, Any]:
     """Returns technical metadata for the LightGBM forecasting model."""
+    load_model_meta = forecast_service.metadata.get("models", {}).get("load_demand_kw", {})
     return {
         "model_architecture": "LightGBM Regressor (Gradient Boosted Decision Trees)",
         "training_dataset_duration": "730 days (2 full polar seasonal cycles)",
-        "calibration_basis": "Real 24-hour AWS snapshots from Maitri Research Station (Queen Maud Land)",
+        "calibration_basis": "Real 24-hour AWS snapshots from Bharati Research Station",
         "features_tracked": forecast_service.FEATURE_COLS,
         "performance_metrics": {
-            "r2_score": forecast_service.metadata.get("r2_score", 0.942),
-            "mae_kw": forecast_service.metadata.get("mae_kw", 2.85),
+            "r2_score": load_model_meta.get("r2_score", 0.942),
+            "mae_kw": load_model_meta.get("mae_kw", 2.85),
         },
-        "feature_importances": forecast_service.metadata.get("feature_importances", {}),
+        "feature_importances": load_model_meta.get("feature_importances", {}),
     }

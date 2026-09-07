@@ -42,6 +42,7 @@ async def get_dashboard_overview() -> Dict[str, Any]:
         "station_mode": "RESEARCH_LIFE_SUPPORT_ACTIVE",
         "ambient_temperature_c": env.get("ambient_temp_c", -52.4),
         "wind_chill_c": env.get("wind_chill_c", -65.2),
+        "environment": env,
         "power_balance": {
             "total_generation_kw": total_gen,
             "total_load_kw": total_dem,

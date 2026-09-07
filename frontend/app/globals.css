@@ -2,46 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .scada-glass {
+    @apply bg-white/60 dark:bg-[#0b0f17]/80 backdrop-blur-md border border-slate-200/50 dark:border-cyan-500/30 shadow-xl;
+  }
+  .scada-glass-panel {
+    @apply bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200/40 dark:border-slate-700/50;
+  }
+  .scada-glass-alert {
+    @apply bg-rose-50/80 dark:bg-[#180d15]/80 backdrop-blur-md border border-rose-500/80 shadow-2xl shadow-rose-900/30;
+  }
+}
+
 :root {
-  --bg-primary: #070b13;
-  --bg-panel: #0d1525;
-  --bg-panel-hover: #121c32;
-  --border-color: #1e293b;
-  --accent-cyan: #38bdf8;
-  --accent-teal: #14b8a6;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
+  --bg-primary: #f8fafc; /* Light mode default */
+  --bg-panel: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #05080f; /* Deep SCADA */
+    --bg-panel: #0b0f17;
+  }
 }
 
 body {
   background-color: var(--bg-primary);
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
+  color: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #f1f5f9;
+  }
 }
 
 /* Custom glowing and pulsing animations for polar microgrid visualization */
 @keyframes flowForward {
-  0% {
-    stroke-dashoffset: 24;
-  }
-  100% {
-    stroke-dashoffset: 0;
-  }
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    opacity: 1;
-    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
-  }
-  50% {
-    opacity: 0.6;
-    filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.2));
-  }
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); }
+  50% { opacity: 0.6; filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.2)); }
 }
 
 @keyframes redAlertPulse {
@@ -74,12 +78,17 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0d1525;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #94a3b8;
   border-radius: 3px;
 }
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+  }
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #64748b;
 }

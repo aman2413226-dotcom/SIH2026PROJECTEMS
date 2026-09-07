@@ -1,0 +1,49 @@
+{
+    "model_type": "LightGBM Regressor",
+    "status": "TRAINED_AND_SAVED",
+    "training_days": 730,
+    "training_samples": 14016,
+    "test_samples": 3504,
+    "calibration_source": "Bharati Research Station Dataset (NCPOR/Kaggle)",
+    "models": {
+        "load_demand_kw": {
+            "r2_score": 0.588,
+            "mae_kw": 1.61,
+            "feature_importances": {
+                "ambient_temp_c": 1430.0,
+                "wind_speed_ms": 1645.0,
+                "hour_sin": 653.0,
+                "hour_cos": 665.0,
+                "day_of_year": 1412.0,
+                "is_polar_day": 83.0,
+                "wind_chill_c": 1096.0
+            }
+        },
+        "solar_output_kw": {
+            "r2_score": 0.977,
+            "mae_kw": 2.12,
+            "feature_importances": {
+                "ambient_temp_c": 663.0,
+                "wind_speed_ms": 691.0,
+                "hour_sin": 217.0,
+                "hour_cos": 1790.0,
+                "day_of_year": 2379.0,
+                "is_polar_day": 278.0,
+                "wind_chill_c": 969.0
+            }
+        },
+        "wind_output_kw": {
+            "r2_score": 0.999,
+            "mae_kw": 0.25,
+            "feature_importances": {
+                "ambient_temp_c": 876.0,
+                "wind_speed_ms": 3314.0,
+                "hour_sin": 508.0,
+                "hour_cos": 528.0,
+                "day_of_year": 791.0,
+                "is_polar_day": 57.0,
+                "wind_chill_c": 586.0
+            }
+        }
+    }
+}
