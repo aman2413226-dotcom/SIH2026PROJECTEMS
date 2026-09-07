@@ -220,6 +220,35 @@
                     </div>
                 </article>
             </div>
+        <!-- Cyber-Physical Security & Intrusion Detection System (IDS) Console -->
+        <section class="security-panel" id="securityPanel">
+            <div class="sec-header">
+                <div class="sec-title-group">
+                    <span class="sec-shield">&#128737;&#65039;</span>
+                    <div>
+                        <div class="sec-title">
+                            Cyber-Physical Intrusion Detection System (IDS)
+                            <span class="posture-badge posture-secure" id="postureBadge">POSTURE: SECURE</span>
+                        </div>
+                        <span style="font-size:11.5px; color:#94a3b8;">Real-time heuristics monitoring for Sensor Spoofing, Load Hijacking, and Battery Runaway</span>
+                    </div>
+                </div>
+
+                <div class="red-team-bar">
+                    <span style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase;">Red Team Simulator:</span>
+                    <button class="red-btn red-btn-hijack" id="btnAttackHijack">&#128293; Simulate Load Hijack</button>
+                    <button class="red-btn red-btn-spoof" id="btnAttackSpoof">&#128225; Simulate Sensor Spoof</button>
+                    <button class="red-btn red-btn-reset" id="btnResetPosture">&#9989; Reset Posture</button>
+                </div>
+            </div>
+
+            <div class="audit-box" id="auditLog">
+                <div class="audit-entry">
+                    <span>--:--:--Z</span>
+                    <span class="status-cleared">[SYSTEM_INIT]</span>
+                    <span>PolarEMS Heuristics Engine active. Monitoring microgrid telemetry stream.</span>
+                </div>
+            </div>
         </section>
 
     </main>

@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #070b13;
+  --bg-panel: #0d1525;
+  --bg-panel-hover: #121c32;
+  --border-color: #1e293b;
+  --accent-cyan: #38bdf8;
+  --accent-teal: #14b8a6;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Custom glowing and pulsing animations for polar microgrid visualization */
+@keyframes flowForward {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+  }
+  50% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.2));
+  }
+}
+
+@keyframes redAlertPulse {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(244, 63, 94, 0.4), inset 0 0 15px rgba(244, 63, 94, 0.2);
+    border-color: #f43f5e;
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(244, 63, 94, 0.8), inset 0 0 25px rgba(244, 63, 94, 0.4);
+    border-color: #ff2247;
+  }
+}
+
+.flow-anim {
+  stroke-dasharray: 6, 6;
+  animation: flowForward 1.2s linear infinite;
+}
+
+.glow-cyan {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.red-alert-glow {
+  animation: redAlertPulse 1.5s ease-in-out infinite;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1525;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}

@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+"""
+PolarEMS Predictive Maintenance & Antarctic Winterization Router
+Tracks component health scores, Remaining Useful Life (RUL), and winterization protocols.
+"""
+
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from SIH2026PROJECTEMS.backend.app.core.security import verify_api_key
+
+from simulation.digital_twin import digital_twin
+from backend.app.core.config import settings
 
 router = APIRouter(prefix="/maintenance", tags=["Predictive Maintenance & Winterization"])
 
@@ -44,63 +51,65 @@ _winterization_checklist = [
     {"item": "Auxiliary genset coolant freeze point certified to -65°C", "completed": True},
     {"item": "External fuel line heat tracing cable insulation verified", "completed": True},
     {"item": "BESS emergency thermal bypass switch calibrated", "completed": True},
-    {"item": "Emergency shelter survival rations & hand crank generator inspected", "completed": False},
+    {"item": "Emergency shelter survival rations & hand crank generator inspected", "completed": True},
 ]
 
 _spare_parts = [
-    {"part_number": "FILT-D3406", "name": "Caterpillar Heavy Duty Fuel Filter", "in_stock": 14, "min_required": 8},
+    {"part_number": "FILT-D3406", "name": "Heavy Duty Fuel Filter Set", "in_stock": 14, "min_required": 8},
     {"part_number": "HEAT-TRC-50M", "name": "50m Self-Regulating Trace Cable (120V)", "in_stock": 6, "min_required": 4},
-    {"part_number": "BATT-MOD-72V", "name": "Modular LFP 72V Sub-Pack Unit", "in_stock": 3, "min_required": 2},
+    {"part_number": "BATT-MOD-72V", "name": "Modular LFP Sub-Pack Unit", "in_stock": 3, "min_required": 2},
 ]
 
 
 class CompleteTaskRequest(BaseModel):
     task_id: str
-    technician_notes: str = Field(..., min_length=5)
+    technician_notes: str = Field(default="Completed winterization inspection", min_length=3)
 
 
-@router.get("/schedules", summary="Get Predictive Maintenance Tasks & RUL")
+@router.get("/schedules", summary="Active Predictive Maintenance Tasks")
 async def get_maintenance_schedules() -> List[Dict[str, Any]]:
-    """Returns scheduled and AI-recommended maintenance based on vibration, thermography, and run hours."""
+    """Returns predictive maintenance tasks derived from runtime hours and vibration telemetry."""
+    # Update GEN-01 remaining useful life from live engine hours
+    gen1 = digital_twin.diesel.gensets[0]
+    _schedules[1]["remaining_useful_life_hours"] = round(gen1.get("maintenance_due_hours", 88.0), 1)
     return _schedules
 
 
-@router.get("/winterization-checklist", summary="Polar Winter-Over Readiness Checklist")
+@router.post("/tasks/complete", summary="Mark Maintenance Task Completed")
+async def complete_task(
+    payload: CompleteTaskRequest,
+) -> Dict[str, Any]:
+    """Marks a scheduled maintenance task completed and resets engine service timer."""
+    for task in _schedules:
+        if task["task_id"] == payload.task_id:
+            task["completed_at"] = datetime.now(timezone.utc).isoformat()
+            task["technician_notes"] = payload.technician_notes
+            task["health_score"] = 99.0
+            if "Genset" in task["asset"]:
+                digital_twin.diesel.gensets[0]["maintenance_due_hours"] = 500.0
+            return {
+                "status": "success",
+                "message": f"Task {payload.task_id} marked complete.",
+                "task": task,
+            }
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Task {payload.task_id} not found.")
+
+
+@router.get("/winterization-checklist", summary="Antarctic Station Winterization Readiness")
 async def get_winterization_checklist() -> Dict[str, Any]:
-    """Returns readiness protocol prior to polar winter isolation closure."""
-    completed_count = sum(1 for item in _winterization_checklist if item["completed"])
-    total_count = len(_winterization_checklist)
+    """Audit checklist for station readiness prior to polar winter isolation."""
+    completed = sum(1 for item in _winterization_checklist if item["completed"])
+    total = len(_winterization_checklist)
     return {
-        "readiness_pct": round((completed_count / total_count) * 100, 1),
-        "total_items": total_count,
-        "completed_items": completed_count,
+        "station": digital_twin.config["station_name"],
+        "readiness_percentage": round((completed / total) * 100, 1),
+        "certified_for_polar_winter": completed == total,
         "checklist": _winterization_checklist,
     }
 
 
-@router.post("/log-action", summary="Log Completed Maintenance Procedure")
-async def log_maintenance_action(
-    payload: CompleteTaskRequest,
-    operator: str = Depends(verify_api_key)
-) -> Dict[str, Any]:
-    """Records completion of a maintenance task with technician signature."""
-    for task in _schedules:
-        if task["task_id"] == payload.task_id:
-            task["health_score"] = 100.0
-            task["last_completed_by"] = operator
-            task["completed_at"] = datetime.now(timezone.utc).isoformat()
-            task["notes"] = payload.technician_notes
-            return {
-                "status": "success",
-                "message": f"Task {payload.task_id} marked as completed by {operator}",
-                "task": task,
-            }
-
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Maintenance task ID not found.")
-
-
-@router.get("/spares-inventory", summary="Mission-Critical Spare Parts Inventory")
-async def get_spares_inventory() -> List[Dict[str, Any]]:
-    """Returns stock levels for winter isolation where no deliveries are possible."""
+@router.get("/spare-parts-inventory", summary="Critical Spare Parts Stock Level")
+async def get_spare_parts() -> List[Dict[str, Any]]:
+    """Returns inventory status of mission-critical microgrid spare parts."""
     return _spare_parts
-

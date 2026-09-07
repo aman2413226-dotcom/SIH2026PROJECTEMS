@@ -1,135 +1,106 @@
+"""
+PolarEMS Diesel Generator Dispatch & Fuel Reserves Router
+Real-time genset dispatch status, fuel reserve tracking, and cold-weather block heating.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List
 from datetime import datetime, timezone
-from SIH2026PROJECTEMS.backend.app.core.config import settings
-from SIH2026PROJECTEMS.backend.app.core.security import verify_api_key
+
+from simulation.digital_twin import digital_twin
+from backend.app.core.config import settings
+from backend.app.core.security import verify_api_key
 
 router = APIRouter(prefix="/diesel", tags=["Diesel Generator Dispatch & Reserves"])
 
-# In-memory polar diesel genset state
-_gensets = {
-    "GEN-01": {
-        "id": "GEN-01",
-        "name": "Primary Polar Genset 1 (Caterpillar 3406 Cold-Spec)",
-        "status": "RUNNING",  # RUNNING, STANDBY_HOT, STANDBY_COLD, MAINTENANCE
-        "power_output_kw": 35.0,
-        "rated_capacity_kw": 80.0,
-        "fuel_consumption_rate_lh": 9.2,
-        "engine_block_temp_c": 78.4,
-        "oil_pressure_bar": 4.2,
-        "coolant_temp_c": 82.0,
-        "total_run_hours": 3412.5,
-        "pre_heater_active": False,
-    },
-    "GEN-02": {
-        "id": "GEN-02",
-        "name": "Secondary Polar Genset 2 (Backup Synchronous)",
-        "status": "STANDBY_HOT",
-        "power_output_kw": 0.0,
-        "rated_capacity_kw": 80.0,
-        "fuel_consumption_rate_lh": 0.0,
-        "engine_block_temp_c": 52.0,  # Maintained hot by jacket heater for instant start
-        "oil_pressure_bar": 0.0,
-        "coolant_temp_c": 54.0,
-        "total_run_hours": 2180.0,
-        "pre_heater_active": True,
-    },
-    "GEN-03": {
-        "id": "GEN-03",
-        "name": "Emergency Cold Genset 3 (Deep Shelter)",
-        "status": "STANDBY_COLD",
-        "power_output_kw": 0.0,
-        "rated_capacity_kw": 80.0,
-        "fuel_consumption_rate_lh": 0.0,
-        "engine_block_temp_c": -12.0,  # Requires 45-min pre-heating cycle before crank
-        "oil_pressure_bar": 0.0,
-        "coolant_temp_c": -10.0,
-        "total_run_hours": 940.2,
-        "pre_heater_active": False,
-    }
-}
 
-_fuel_inventory = {
-    "total_capacity_liters": 75000,
-    "current_stock_liters": 48200,
-    "fuel_type": "Polar Grade Aviation Kerosene (F-34 / Jet A-1 with Anti-Gel Additives)",
-    "daily_burn_rate_avg_liters": 220.0,
-    "next_supply_ship_days": 115,
-}
+class GensetControlRequest(BaseModel):
+    action: str = Field(..., description="START, STOP, PRE_HEAT")
+    target_kw: float = Field(default=40.0, ge=0.0, le=100.0)
 
 
-class GensetCommandRequest(BaseModel):
-    genset_id: str = Field(..., description="GEN-01, GEN-02, or GEN-03")
-    action: str = Field(..., description="START, STOP, PRE_HEAT, or SET_LOAD")
-    target_load_kw: float = Field(default=0.0, ge=0.0, le=80.0)
+@router.get("/generators", summary="Get Telemetry for All Station Diesel Gensets")
+async def get_diesel_generators() -> List[Dict[str, Any]]:
+    """Returns telemetry for all generators in the polar power station from Digital Twin."""
+    gensets = digital_twin.diesel.gensets
+    result = []
+    for g in gensets:
+        output_kw = g.get("output_kw", 0.0)
+        burn_lh = round(output_kw * 0.28 + (2.8 if output_kw > 0 else 0.0), 2)
+        result.append({
+            "id": g["id"],
+            "name": g["name"],
+            "status": "RUNNING" if output_kw > 0 else g["status"],
+            "power_output_kw": output_kw,
+            "rated_capacity_kw": digital_twin.diesel.rated_kw,
+            "fuel_consumption_rate_lh": burn_lh,
+            "engine_block_temp_c": g.get("coolant_temp_c", 82.0),
+            "coolant_temp_c": g.get("coolant_temp_c", 82.0),
+            "total_run_hours": round(g.get("runtime_hours", 3000.0), 1),
+            "service_due_hours": round(g.get("maintenance_due_hours", 250.0), 1),
+            "pre_heater_active": g.get("status") in ["STANDBY", "WARMING_UP"],
+        })
+    return result
 
 
-@router.get("/generators", summary="Get Status of Polar Diesel Generators")
-async def get_generators() -> List[Dict[str, Any]]:
-    """Returns telemetry and readiness of all three polar emergency diesel generators."""
-    return list(_gensets.values())
-
-
-@router.post("/dispatch", summary="Dispatch or Control Diesel Genset")
-async def dispatch_genset(
-    payload: GensetCommandRequest,
-    operator: str = Depends(verify_api_key)
+@router.post("/generators/{genset_id}/control", summary="Manual Operator Control of Diesel Genset")
+async def control_generator(
+    genset_id: str,
+    payload: GensetControlRequest,
 ) -> Dict[str, Any]:
-    """
-    Commands a diesel generator. Includes polar interlocks:
-    Prevents engine start if block temperature is below 40°C to prevent thermal shock / engine seizure.
-    """
-    if payload.genset_id not in _gensets:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Genset {payload.genset_id} not found.")
+    """Manually start, stop, or preheat a polar diesel generator."""
+    target_genset = None
+    for g in digital_twin.diesel.gensets:
+        if g["id"] == genset_id:
+            target_genset = g
+            break
 
-    genset = _gensets[payload.genset_id]
+    if not target_genset:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Genset {genset_id} not found.")
 
     if payload.action == "START":
-        if genset["engine_block_temp_c"] < 40.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Safety Interlock: Block temp ({genset['engine_block_temp_c']}°C) is below 40°C. "
-                       f"Engage PRE_HEAT before starting to prevent cold engine failure in polar temperatures.",
-            )
-        genset["status"] = "RUNNING"
-        genset["power_output_kw"] = payload.target_load_kw if payload.target_load_kw > 0 else 40.0
-        genset["fuel_consumption_rate_lh"] = round(genset["power_output_kw"] * 0.26, 1)
-
+        target_genset["status"] = "ONLINE"
+        target_genset["output_kw"] = payload.target_kw
     elif payload.action == "STOP":
-        genset["status"] = "STANDBY_HOT"
-        genset["power_output_kw"] = 0.0
-        genset["fuel_consumption_rate_lh"] = 0.0
-
+        target_genset["status"] = "STANDBY"
+        target_genset["output_kw"] = 0.0
     elif payload.action == "PRE_HEAT":
-        genset["pre_heater_active"] = True
-        genset["engine_block_temp_c"] = 48.0
-        genset["status"] = "STANDBY_HOT"
+        target_genset["status"] = "WARMING_UP"
+        target_genset["startup_timer_s"] = 120.0
 
-    elif payload.action == "SET_LOAD":
-        if genset["status"] != "RUNNING":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Genset must be RUNNING to set load.")
-        genset["power_output_kw"] = payload.target_load_kw
-        genset["fuel_consumption_rate_lh"] = round(payload.target_load_kw * 0.26, 1)
+    digital_twin.tick(seconds=1)
 
     return {
         "status": "success",
-        "message": f"Command {payload.action} executed on {payload.genset_id} by {operator}",
-        "genset_state": genset,
+        "genset_id": genset_id,
+        "new_status": target_genset["status"],
+        "message": f"Command {payload.action} executed for {genset_id}.",
     }
 
 
-@router.get("/fuel-reserve", summary="Get Polar Fuel Inventory & Autonomy Calculation")
+@router.get("/fuel-reserve", summary="Polar Diesel Fuel Inventory & Endurance Projection")
 async def get_fuel_reserve() -> Dict[str, Any]:
-    """Calculates days of fuel autonomy based on current burn rate and seasonal resupply windows."""
-    remaining_days = round(_fuel_inventory["current_stock_liters"] / _fuel_inventory["daily_burn_rate_avg_liters"], 1)
-    resupply_margin_days = round(remaining_days - _fuel_inventory["next_supply_ship_days"], 1)
+    """Returns total fuel remaining, daily burn rate, and endurance until next resupply voyage."""
+    telemetry = digital_twin.latest_telemetry
+    diesel = telemetry.get("diesel", {})
+    remaining = diesel.get("fuel_remaining_liters", 45000.0)
+    capacity = digital_twin.diesel.tank_capacity_liters
+    ratio_pct = round((remaining / capacity) * 100.0, 1)
+
+    burn_lh = diesel.get("fuel_burn_rate_l_per_h", 8.5)
+    daily_burn = max(50.0, round(burn_lh * 24.0, 1))
+    days_endurance = round(remaining / daily_burn, 1)
 
     return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        **_fuel_inventory,
-        "autonomy_days": remaining_days,
-        "resupply_safety_margin_days": resupply_margin_days,
-        "reserve_alert_level": "NORMAL" if resupply_margin_days > 20 else "WARNING_CONSERVATION_REQUIRED",
+        "timestamp": telemetry.get("timestamp"),
+        "station_code": digital_twin.config["station_code"],
+        "total_capacity_liters": capacity,
+        "current_stock_liters": round(remaining, 1),
+        "fill_percentage": ratio_pct,
+        "fuel_type": "Polar Grade Aviation Kerosene (F-34 / Jet A-1 with Anti-Gel Additives)",
+        "daily_burn_rate_liters": daily_burn,
+        "days_endurance_remaining": days_endurance,
+        "is_critical_reserve": ratio_pct < 20.0,
+        "annual_resupply_window": "AUSTRAL_SUMMER_DECEMBER_FEBRUARY",
     }
-

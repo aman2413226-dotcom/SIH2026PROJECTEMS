@@ -1,7 +1,7 @@
 import time
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request, Response
-from SIH2026PROJECTEMS.backend.app.core.logger import logger
+from backend.app.core.logger import logger
 
 
 class TelemetryLoggingMiddleware(BaseHTTPMiddleware):
